@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>赵禹贺｜简历</title>
+    <style>
+      :root {
+        color-scheme: light;
+        background: #f2f2f2;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: #f2f2f2;
+      }
+
+      .resume {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        padding: 24px 12px;
+      }
+
+      .page {
+        display: block;
+        width: min(794px, 100%);
+        height: auto;
+        background: #fff;
+      }
+
+      @media (max-width: 818px) {
+        .resume {
+          gap: 12px;
+          padding: 0;
+        }
+      }
+
+      @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
+
+        html,
+        body {
+          min-width: 0;
+          background: #fff;
+        }
+
+        .resume {
+          display: block;
+          padding: 0;
+        }
+
+        .page {
+          width: 210mm;
+          max-width: none;
+          break-after: page;
+          page-break-after: always;
+        }
+
+        .page:last-child {
+          break-after: auto;
+          page-break-after: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="resume" aria-label="赵禹贺的三页简历">
+      <img class="page" src="assets/page-1.jpeg" width="794" height="1123" alt="简历第 1 页">
+      <img class="page" src="assets/page-2.jpeg" width="794" height="1123" alt="简历第 2 页" loading="lazy">
+      <img class="page" src="assets/page-3.jpeg" width="794" height="1123" alt="简历第 3 页" loading="lazy">
+    </main>
+  </body>
+</html>
