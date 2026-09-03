@@ -29,11 +29,55 @@
         padding: 24px 12px;
       }
 
-      .page {
-        display: block;
+      .page-shell {
+        position: relative;
         width: min(794px, 100%);
-        height: auto;
+        aspect-ratio: 794 / 1123;
+        overflow: hidden;
         background: #fff;
+        container-type: inline-size;
+        --page-scale: 1;
+      }
+
+      .page-image {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .text-layer {
+        position: absolute;
+        inset: 0 auto auto 0;
+        z-index: 1;
+        width: 794px;
+        height: 1123px;
+        overflow: hidden;
+        transform: scale(var(--page-scale));
+        transform-origin: left top;
+        cursor: text;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      .text-item {
+        position: absolute;
+        display: block;
+        margin: 0;
+        overflow: hidden;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        font-family: "Alibaba PuHuiTi", "Alibaba PuHuiTi 3.0", sans-serif;
+        white-space: pre-wrap;
+        overflow-wrap: normal;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      .text-item::selection {
+        color: transparent;
+        background: rgba(0, 123, 134, 0.3);
       }
 
       @media (max-width: 818px) {
@@ -60,14 +104,14 @@
           padding: 0;
         }
 
-        .page {
+        .page-shell {
           width: 210mm;
           max-width: none;
           break-after: page;
           page-break-after: always;
         }
 
-        .page:last-child {
+        .page-shell:last-child {
           break-after: auto;
           page-break-after: auto;
         }
@@ -76,9 +120,68 @@
   </head>
   <body>
     <main class="resume" aria-label="赵禹贺的三页简历">
-      <img class="page" src="assets/page-1.jpeg" width="794" height="1123" alt="简历第 1 页">
-      <img class="page" src="assets/page-2.jpeg" width="794" height="1123" alt="简历第 2 页" loading="lazy">
-      <img class="page" src="assets/page-3.jpeg" width="794" height="1123" alt="简历第 3 页" loading="lazy">
+      <section class="page-shell" aria-label="简历第 1 页">
+        <img class="page-image" src="assets/page-1.jpeg" width="794" height="1123" alt="" aria-hidden="true">
+        <div class="text-layer" role="document"></div>
+      </section>
+      <section class="page-shell" aria-label="简历第 2 页">
+        <img class="page-image" src="assets/page-2.jpeg" width="794" height="1123" alt="" aria-hidden="true" loading="lazy">
+        <div class="text-layer" role="document"></div>
+      </section>
+      <section class="page-shell" aria-label="简历第 3 页">
+        <img class="page-image" src="assets/page-3.jpeg" width="794" height="1123" alt="" aria-hidden="true" loading="lazy">
+        <div class="text-layer" role="document"></div>
+      </section>
     </main>
+    <script>
+      const pageShells = [...document.querySelectorAll(".page-shell")];
+
+      const updateScale = (shell) => {
+        shell.style.setProperty("--page-scale", shell.clientWidth / 794);
+      };
+
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) updateScale(entry.target);
+      });
+
+      for (const shell of pageShells) {
+        updateScale(shell);
+        resizeObserver.observe(shell);
+      }
+
+      fetch("assets/text-layer.json")
+        .then((response) => {
+          if (!response.ok) throw new Error(`Text layer request failed: ${response.status}`);
+          return response.json();
+        })
+        .then(({ pages }) => {
+          pages.forEach((page, pageIndex) => {
+            const layer = pageShells[pageIndex]?.querySelector(".text-layer");
+            if (!layer) return;
+
+            const fragment = document.createDocumentFragment();
+            page.texts.forEach((item) => {
+              const text = document.createElement("div");
+              text.className = "text-item";
+              text.textContent = item.t;
+              text.style.left = `${item.x}px`;
+              text.style.top = `${item.y}px`;
+              text.style.width = `${Math.max(item.w, 1)}px`;
+              text.style.height = `${Math.max(item.h, 1)}px`;
+              text.style.fontSize = `${item.s}px`;
+              text.style.fontWeight = item.fw;
+              text.style.lineHeight = `${item.lh || item.s * 1.38}px`;
+              text.style.textAlign = (item.a || "LEFT").toLowerCase();
+              fragment.appendChild(text);
+            });
+
+            layer.replaceChildren(fragment);
+            layer.dataset.ready = "true";
+          });
+        })
+        .catch(() => {
+          // The resume image remains fully usable if the optional text layer fails.
+        });
+    </script>
   </body>
 </html>
